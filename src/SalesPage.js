@@ -1,12 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import './SalesPage.css';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+const options = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top',
+    },
+    title: {
+      display: true,
+      text: 'Sales Data',
+    },
+  },
+};
 
 const SalesPage = () => {
   const [data, setData] = useState(null);
+  const [salesData, setSalesData] = useState(null);
   const [selectedStore, setSelectedStore] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedYear, setSelectedYear] = useState(2023);
+  const [selectedDepartments, setSelectedDepartments] = useState([]);
+  const [selectedYear, setSelectedYear] = useState('');
   const [selectedQuarter, setSelectedQuarter] = useState(1);
 
   useEffect(() => {
@@ -14,29 +49,62 @@ const SalesPage = () => {
       .then(response => {
         setData(response.data);
         setSelectedStore(response.data.total_Store[0]);
-        setSelectedDepartment(response.data.total_Department[0]);
       })
       .catch(err => console.log(err));
   }, []);
 
-  const handleFilterSubmit = () => {
-    axios.post('http://localhost:5000/sales_data', {
-      store: selectedStore,
-      Department: [selectedDepartment],
-      year: selectedYear,
-      quarter: selectedQuarter
-    })
-    .then(response => console.log(response.data))
-    .catch(err => console.log(err));
+  useEffect(() => {
+    if (selectedStore && selectedYear && selectedQuarter) {
+      axios.post('http://localhost:5000/sales_data', {
+        store: selectedStore,
+        departments: selectedDepartments,
+        year: selectedYear,
+        quarter: selectedQuarter
+      })
+      .then(response => {
+        setSalesData({
+          labels: response.data.map(item => item.Date),
+          datasets: [{
+            label: 'Weekly Sales',
+            data: response.data.map(item => item.Weekly_Sales),
+            fill: false,
+            backgroundColor: 'rgb(75, 192, 192)',
+            borderColor: 'rgba(75, 192, 192, 0.2)',
+          }]
+        });
+      })
+      .catch(err => console.log(err));
+    }
+  }, [selectedStore, selectedDepartments, selectedYear, selectedQuarter]);
+
+  const handleSubmit = () => {
+    if (selectedStore && selectedYear && selectedQuarter) {
+      axios.post('http://localhost:5000/sales_data', {
+        store: selectedStore,
+        departments: selectedDepartments,
+        year: selectedYear,
+        quarter: selectedQuarter
+      })
+      .then(response => {
+        setSalesData({
+          labels: response.data.map(item => item.Date),
+          datasets: [{
+            label: 'Weekly Sales',
+            data: response.data.map(item => item.Weekly_Sales),
+            fill: false,
+            backgroundColor: 'rgb(75, 192, 192)',
+            borderColor: 'rgba(75, 192, 192, 0.2)',
+          }]
+        });
+      })
+      .catch(err => console.log(err));
+    }
   };
 
   return (
     <div className="sales-page">
       <h1>Sales Page</h1>
 
-      {/* Rest of your code */}
-
-      {/* Replace hardcoded dropdown options with data from backend */}
       <div className="filters">
         <label>
           Choose Store:
@@ -45,36 +113,234 @@ const SalesPage = () => {
             onChange={(e) => setSelectedStore(e.target.value)}
           >
             <option value="All">All Stores</option>
-            {data && data.total_Stores.map((Store, index) => (
-              <option key={index} value={Store}>{Store}</option>
+            {data && data.total_Store && data.total_Store.map((store, index) => (
+              <option key={index} value={store}>{store}</option>
             ))}
           </select>
         </label>
 
         <label>
-          Choose Department:
+          Choose Departments:
           <select
-            value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
+            multiple
+            value={selectedDepartments}
+            onChange={(e) => setSelectedDepartments(Array.from(e.target.selectedOptions, option => option.value))}
           >
-            <option value="All">All Department</option>
-            {data && data.total_Department.map((department, index) => (
+            {data && data.total_Department && data.total_Department.map((department, index) => (
               <option key={index} value={department}>{department}</option>
             ))}
           </select>
         </label>
 
-        {/* Rest of your code */}
+        <label>
+          Choose Year:
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="2010">2010</option>
+            <option value="2011">2011</option>
+            <option value="2012">2012</option>
+          </select>
+        </label>
+
+        <label>
+          Choose Quarter:
+          <select
+            value={selectedQuarter}
+            onChange={(e) => setSelectedQuarter(e.target.value)}
+          >
+            <option value="1">Q1</option>
+            <option value="2">Q2</option>
+            <option value="3">Q3</option>
+            <option value="4">Q4</option>
+          </select>
+        </label>
+
+        <button onClick={handleSubmit}>Submit</button>
       </div>
 
-      {/* Submit button */}
-      <button onClick={handleFilterSubmit}>Submit</button>
-
-      {/* (iii) Multi-line graph to show sales data */}
-      <h2>Sales Data Graph</h2>
-      {/* Add your graph code here using a library like Chart.js */}
+      <div>
+        {salesData && (
+          <Line options={options} data={salesData} />
+        )}
+      </div>
     </div>
   );
 }
 
 export default SalesPage;
+
+
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import {
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+// } from 'chart.js';
+// import { Line } from 'react-chartjs-2';
+// import './SalesPage.css';
+
+// ChartJS.register(
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   Title,
+//   Tooltip,
+//   Legend
+// );
+
+// const options = {
+//   responsive: true,
+//   plugins: {
+//     legend: {
+//       position: 'top',
+//     },
+//     title: {
+//       display: true,
+//       text: 'Sales Data',
+//     },
+//   },
+// };
+
+//   const SalesPage = () => {
+//   const [data, setData] = useState(null);
+//   const [salesData, setSalesData] = useState(null);
+//   const [selectedStore, setSelectedStore] = useState('');
+//   const [selectedDepartments, setSelectedDepartments] = useState([]);
+//   const [selectedYear, setSelectedYear] = useState('');
+//   const [selectedQuarter, setSelectedQuarter] = useState(1);
+
+//   useEffect(() => {
+//     axios.get('http://localhost:5000/count')
+//       .then(response => {
+//         setData(response.data);
+//         setSelectedStore(response.data.total_Store[0]);
+//       })
+//       .catch(err => console.log(err));
+//   }, []);
+
+//   useEffect(() => {
+//     if (selectedStore && selectedYear && selectedQuarter) {
+//       axios.post('http://localhost:5000/sales_data', {
+//         store: selectedStore,
+//         departments: selectedDepartments,
+//         year: selectedYear,
+//         quarter: selectedQuarter
+//       })
+//       .then(response => {
+//         setSalesData({
+//           labels: response.data.map(item => item.Date),
+//           datasets: [{
+//             label: 'Weekly Sales',
+//             data: response.data.map(item => item.Weekly_Sales),
+//             fill: false,
+//             backgroundColor: 'rgb(75, 192, 192)',
+//             borderColor: 'rgba(75, 192, 192, 0.2)',
+//           }]
+//         });
+//       })
+//       .catch(err => console.log(err));
+//     }
+//   }, [selectedStore, selectedDepartments, selectedYear, selectedQuarter]);
+
+//   const handleSubmit = () => {
+//     if (selectedStore && selectedYear && selectedQuarter) {
+//       axios.post('http://localhost:5000/sales_data', {
+//         store: selectedStore,
+//         departments: selectedDepartments,
+//         year: selectedYear,
+//         quarter: selectedQuarter
+//       })
+//       .then(response => {
+//         setSalesData({
+//           labels: response.data.map(item => item.Date),
+//           datasets: [{
+//             label: 'Weekly Sales',
+//             data: response.data.map(item => item.Weekly_Sales),
+//             fill: false,
+//             backgroundColor: 'rgb(75, 192, 192)',
+//             borderColor: 'rgba(75, 192, 192, 0.2)',
+//           }]
+//         });
+//       })
+//       .catch(err => console.log(err));
+//     }
+//   };
+
+//   return (
+//     <div className="sales-page">
+//       <h1>Sales Page</h1>
+
+//       <div className="filters">
+//         <label>
+//           Choose Store:
+//           <select
+//             value={selectedStore}
+//             onChange={(e) => setSelectedStore(e.target.value)}
+//           >
+//             <option value="All">All Stores</option>
+//             {data && data.total_Store && Array.isArray(data.total_Store) && data.total_Store.map((store, index) => (
+//               <option key={index} value={store}>{store}</option>
+//             ))}
+//           </select>
+//         </label>
+
+//         <label>
+//           Choose Departments:
+//           <select
+//             multiple
+//             value={selectedDepartments}
+//             onChange={(e) => setSelectedDepartments(Array.from(e.target.selectedOptions, option => option.value))}
+//           >
+//             {data && data.total_Department && Array.isArray(data.total_Department) && data.total_Department.map((department, index) => (
+//               <option key={index} value={department}>{department}</option>
+//             ))}
+//           </select>
+//         </label>
+
+//         <label>
+//           Choose Year:
+//           <select
+//             value={selectedYear}
+//             onChange={(e) => setSelectedYear(e.target.value)}
+//           >
+//             <option value="2010">2010</option>
+//             <option value="2011">2011</option>
+//             <option value="2012">2012</option>
+//           </select>
+//         </label>
+
+//         <label>
+//           Choose Quarter:
+//           <select
+//             value={selectedQuarter}
+//             onChange={(e) => setSelectedQuarter(e.target.value)}
+//           >
+//             <option value="1">Q1</option>
+//             <option value="2">Q2</option>
+//             <option value="3">Q3</option>
+//             <option value="4">Q4</option>
+//           </select>
+//         </label>
+
+//         <button onClick={handleSubmit}>Submit</button>
+//       </div>
+
+//       <div>
+//         {salesData && (
+//           <Line options={options} data={salesData} />
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default SalesPage;
