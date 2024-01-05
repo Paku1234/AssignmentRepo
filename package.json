@@ -3,24 +3,46 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@google-cloud/speech": "^6.1.0",
     "@kurkle/color": "^0.3.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.6.1",
+    "annyang": "^2.6.1",
+    "apexcharts": "^3.44.2",
+    "axios": "^1.6.2",
     "chart.js": "^4.4.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-adapter-moment": "^1.0.1",
+    "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
+    "franc-min": "^6.1.0",
+    "langchain": "^0.0.209",
+    "langdetect": "^0.2.1",
+    "language-detection": "^0.3.8",
+    "microsoft-cognitiveservices-speech-sdk": "^1.34.0",
     "moment": "^2.29.4",
+    "natural": "^6.10.4",
+    "openai": "^4.20.1",
     "papaparse": "^5.4.1",
+    "path-browserify": "^1.0.1",
     "react": "^18.2.0",
+    "react-apexcharts": "^1.4.1",
     "react-chartjs-2": "^5.2.0",
+    "react-chat-widget": "^3.1.4",
+    "react-chatbot-kit": "^2.2.1",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.18.0",
+    "react-google-charts": "^4.0.1",
+    "react-papaparse": "^4.4.0",
+    "react-responsive-carousel": "^3.2.23",
+    "react-router-dom": "^6.20.0",
     "react-scripts": "^5.0.1",
+    "react-speech-recognition": "^3.10.0",
+    "react-table": "^7.8.0",
+    "util": "^0.12.5",
     "web-vitals": "^2.1.4",
+    "words-to-numbers": "^1.5.1",
     "xlsx": "^0.18.5"
   },
   "scripts": {
@@ -46,5 +68,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }

@@ -6,7 +6,7 @@ import numpy as np
 import openai
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='D:/multi-page-app/src/backend/templates')
 CORS(app)  # Enable CORS for all routes
 
 # Read the Assignment_Data file
@@ -104,22 +104,6 @@ def get_sales_data():
 
     return jsonify(result)
 
-@app.route('/modified_sales_data', methods=['GET','POST'])
-def get_modified_sales_data():
-    data = request.get_json()
-    print("Data", data)
-    # Filter data based on selected store, department, and date
-    filtered_df = df[(df['Store'] == np.int64(data['store'])) & 
-                  (df['Department'] == np.int64(data['department']))]
-
-    print("filtered_df",filtered_df)
-    # Convert filtered data to dictionary format
-    result = filtered_df.to_dict('records')
-    print("Sales_dataResults",result)
-
-    return jsonify(result)
-
-
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
    message = request.json['message']
@@ -129,8 +113,6 @@ def chatbot():
        max_tokens=150
    )
    return jsonify(response.choices[0].text.strip())
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, port= 5000)

@@ -1,21 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Papa from 'papaparse';
 
 function ExcelReader({ onDataLoaded }) {
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  useEffect(() => {
+    const file = require('./src/data/Assignment_Data.csv');
     Papa.parse(file, {
+      download: true,
       complete: (results) => {
         onDataLoaded(results.data);
       },
     });
-  };
+  }, []);
 
-  return (
-    <div>
-      <input type="file" onChange={handleFileChange} />
-    </div>
-  );
+  return null;
 }
 
 export default ExcelReader;
